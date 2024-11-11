@@ -1,6 +1,6 @@
 use crate::device::GpuDevice;
-use egui::*;
 use eframe::*;
+use egui::*;
 
 pub struct App {
     pub gpu: GpuDevice,
@@ -13,7 +13,5 @@ impl App {
 }
 
 impl eframe::App for App {
-    fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-        
-    }
+    fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {}
 }

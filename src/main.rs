@@ -2,16 +2,16 @@ use std::sync::Arc;
 
 use eframe::egui;
 use egui_wgpu::WgpuConfiguration;
-use tokio::runtime::{Runtime, Builder};
-use serde::{Serialize, Deserialize};
-use wgpu::{DeviceDescriptor, Features};
 use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
+use tokio::runtime::{Builder, Runtime};
+use wgpu::{DeviceDescriptor, Features};
 
-pub mod device;
 pub mod app;
+pub mod device;
 
-use device::GpuDevice;
 use app::App;
+use device::GpuDevice;
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
@@ -24,10 +24,7 @@ lazy_static! {
         let bin_dir = std::env::current_exe().expect("Can't find path to executable");
         let bin_dir = bin_dir.parent().unwrap();
 
-        let resources_dir = format!(
-            "{}/kod_resources",
-            bin_dir.display()
-        );
+        let resources_dir = format!("{}/kod_resources", bin_dir.display());
 
         resources_dir
     };
@@ -76,11 +73,10 @@ fn main() -> eframe::Result {
         Box::new(|cc| {
             let render_state = cc.wgpu_render_state.clone().unwrap();
 
-            let shaders_dir = format!(
-                "{}/shaders",
-                *RESOURCES_DIR,
-            );
-            let gpu = RT.block_on(GpuDevice::new(render_state, shaders_dir)).unwrap();
+            let shaders_dir = format!("{}/shaders", *RESOURCES_DIR,);
+            let gpu = RT
+                .block_on(GpuDevice::new(render_state, shaders_dir))
+                .unwrap();
 
             let app = App::new(gpu);
 
