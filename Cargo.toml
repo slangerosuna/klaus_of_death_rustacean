@@ -1,0 +1,30 @@
+[package]
+name = "klaus_of_death"
+version = "0.0.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+# build_local.rs on `cargo r` or `cargo b`, build_install.rs on `cargo install`
+build = "build_local.rs"
+
+[dependencies]
+image = { version = "0.25.4", default-features = false, features = ["jpeg", "png"] }
+wgpu = "22.1.0"
+lazy_static = "1.5.0"
+tokio = { version = "1.40.0", features = ["full"] }
+futures = "0.3.30"
+bytemuck = "1.18.0"
+egui = "0.29.1"
+egui-wgpu = "0.29.1"
+eframe = { version = "0.29.1", features = ["wgpu"] }
+serde = { version = "1.0.214", features = ["derive"] }
+bincode = "1.3.3"
+toml = "0.8.19"
+ron = "0.8.1"
+
+[profile.dev]
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+overflow-checks = false
