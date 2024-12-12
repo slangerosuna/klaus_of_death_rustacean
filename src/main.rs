@@ -1,4 +1,9 @@
+#![feature(sync_unsafe_cell)]
+#![feature(trait_upcasting)]
+#![feature(downcast_unchecked)]
+
 use std::sync::Arc;
+use std::ops::Deref;
 
 use eframe::egui;
 use egui_wgpu::WgpuConfiguration;
@@ -8,30 +13,17 @@ use tokio::runtime::{Builder, Runtime};
 use wgpu::{DeviceDescriptor, Features};
 
 pub mod app;
-pub mod device;
+pub mod core;
+pub mod networking;
+pub mod render;
 
 use app::App;
-use device::GpuDevice;
-
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    pub worker_threads: usize,
-    pub inner_size: [f32; 2],
-}
+pub use core::*;
+use networking::{Networking, NetworkingCreationInfo};
+use render::device::GpuDevice;
 
 lazy_static! {
-    pub static ref RESOURCES_DIR: String = {
-        let bin_dir = std::env::current_exe().expect("Can't find path to executable");
-        let bin_dir = bin_dir.parent().unwrap();
-
-        let resources_dir = format!("{}/kod_resources", bin_dir.display());
-
-        resources_dir
-    };
-    pub static ref CONFIG: Config = {
-        let config = get_resource_string("config.toml");
-        toml::from_str(&config).unwrap()
-    };
+    pub static ref CONFIG: Config = get_resource_toml("config.toml");
     pub static ref RT: Runtime = {
         Builder::new_multi_thread()
             .worker_threads(CONFIG.worker_threads)
@@ -41,17 +33,13 @@ lazy_static! {
     };
 }
 
-pub fn get_resource_string(resource: &str) -> String {
-    let path = format!("{}/{}", *RESOURCES_DIR, resource);
-    std::fs::read_to_string(path).unwrap()
+#[derive(Serialize, Deserialize)]
+pub struct Config {
+    pub worker_threads: usize,
+    pub inner_size: [f32; 2],
 }
 
-pub fn get_resource_bin(resource: &str) -> Vec<u8> {
-    let path = format!("{}/{}", *RESOURCES_DIR, resource);
-    std::fs::read(path).unwrap()
-}
-
-fn main() -> eframe::Result {
+fn main() -> ! {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size(&CONFIG.inner_size),
         renderer: eframe::Renderer::Wgpu,
@@ -72,17 +60,64 @@ fn main() -> eframe::Result {
         options,
         Box::new(|cc| {
             let render_state = cc.wgpu_render_state.clone().unwrap();
+            let app = App::new();
 
-            let shaders_dir = format!("{}/shaders", *RESOURCES_DIR,);
-            let gpu = RT
-                .block_on(GpuDevice::new(render_state, shaders_dir))
-                .unwrap();
-
-            let app = App::new(gpu);
+            RT.spawn(unsafe { SendBox::new(init_game(render_state, app.clone())) });
 
             Ok(Box::new(app))
         }),
-    )?;
+    ).unwrap();
 
-    Ok(())
+    std::process::exit(0);
+}
+
+struct SendBox<T>(std::pin::Pin<Box<T>>);
+
+unsafe impl<T> Send for SendBox<T> {}
+
+impl<T> SendBox<T> {
+    unsafe fn new(t: T) -> Self {
+        SendBox(Box::pin(t))
+    }
+}
+
+impl<T> futures::Future for SendBox<T>
+where
+    T: futures::Future + 'static,
+{
+    type Output = T::Output;
+
+    fn poll(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context,
+    ) -> std::task::Poll<Self::Output> {
+        self.0.as_mut().poll(cx)
+    }
+}
+
+async fn init_game(render_state: egui_wgpu::RenderState, app: App) {
+    let mut scheduler = Scheduler::new(0.01);
+    let mut game_state = core::GameState::new(&mut scheduler, &CONFIG);
+
+    let shaders_dir = format!("{}/shaders", *RESOURCES_DIR,);
+    let gpu = RT
+        .block_on(GpuDevice::new(render_state, shaders_dir))
+        .unwrap();
+    let networking = Networking::new(NetworkingCreationInfo {
+        ..Default::default()
+    });
+
+    game_state.add_resource(gpu);
+    game_state.add_resource(app.clone());
+    game_state.add_resource(networking);
+
+    scheduler.init(&mut game_state).await;
+
+    let fixed_update_scheduler = unsafe { &*(&scheduler as *const Scheduler) };
+    let fixed_update_future = fixed_update_scheduler.loop_fixed_update(&mut game_state as *mut _);
+    let mut fixed_update_future = unsafe { SendBox::new(fixed_update_future) };
+    let fixed_update_future =
+        unsafe { std::pin::Pin::new_unchecked(&mut *(&mut fixed_update_future as *mut _)) };
+
+    
 }

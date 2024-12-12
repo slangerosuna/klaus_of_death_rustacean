@@ -1,17 +1,36 @@
-use crate::device::GpuDevice;
+use std::sync::Arc;
+
 use eframe::*;
 use egui::*;
 
-pub struct App {
-    pub gpu: GpuDevice,
-}
+use crate::impl_resource;
 
-impl App {
-    pub fn new(gpu: GpuDevice) -> Self {
-        Self { gpu }
+struct AppInternal {}
+
+impl AppInternal {
+    pub fn new() -> Self {
+        Self {}
     }
 }
 
+#[derive(Clone)]
+pub struct App(Arc<AppInternal>);
+
+impl App {
+    pub fn new() -> Self {
+        Self(Arc::new(AppInternal::new()))
+    }
+}
+
+impl_resource!(App, 0);
+
 impl eframe::App for App {
-    fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {}
+    fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Hello World!");
+            ui.horizontal(|ui| {
+                ui.label("This is a simple egui app.");
+            });
+        });
+    }
 }

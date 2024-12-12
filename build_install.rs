@@ -6,8 +6,6 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
     let base_target_dir = std::env::var("CARGO_HOME").unwrap();
-    let shader_target_dir = format!("{}/bin/kod_shaders", base_target_dir);
-
     let resources_dir = format!("{}/bin/kod_resources", base_target_dir);
     let resources_dir = Path::new(resources_dir.as_str());
 

@@ -3,10 +3,13 @@ use std::{collections::HashMap, path::PathBuf};
 use egui_wgpu::RenderState;
 use wgpu::*;
 
+use crate::impl_resource;
+
 pub struct GpuDevice {
     pub render_state: RenderState,
     pub shaders: HashMap<String, ShaderModule>,
 }
+impl_resource!(GpuDevice, 2);
 
 #[inline]
 pub fn pad_to_multiple_of_256(n: u32) -> u32 {
