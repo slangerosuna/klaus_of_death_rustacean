@@ -9,7 +9,7 @@ pub struct GpuDevice {
     pub render_state: RenderState,
     pub shaders: HashMap<String, ShaderModule>,
 }
-impl_resource!(GpuDevice, 2);
+impl_resource!(GpuDevice, 1);
 
 #[inline]
 pub fn pad_to_multiple_of_256(n: u32) -> u32 {

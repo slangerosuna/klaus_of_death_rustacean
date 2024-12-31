@@ -25,7 +25,7 @@ pub struct Networking {
 
     pub connected: bool,
 }
-impl_resource!(Networking, 1);
+impl_resource!(Networking, 0);
 
 impl Networking {
     pub fn new(info: NetworkingCreationInfo) -> Self {
