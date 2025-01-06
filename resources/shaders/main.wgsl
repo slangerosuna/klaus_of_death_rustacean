@@ -2,7 +2,12 @@
 const SCREEN_WIDTH: u32 = 320;  // Screen resolution width
 const SCREEN_HEIGHT: u32 = 200; // Screen resolution height
 const MAP_SIZE: u32 = 64;       // Size of the game map
-var<private> COLORS: array<vec4<f32>, 8> = array(
+
+const FLOOR_COLOR: vec4<f32> = vec4(0.3, 0.3, 0.3, 1.0);
+const ROOF_COLOR: vec4<f32> = vec4(0.7, 0.7, 0.7, 1.0);
+
+var<private> COLORS: array<vec4<f32>, 9> = array(
+    vec4<f32>(0.0, 0.0, 0.0, 0.0), // No wall
     vec4<f32>(1.0, 0.0, 0.0, 1.0), // Red
     vec4<f32>(0.0, 1.0, 0.0, 1.0), // Green
     vec4<f32>(0.0, 0.0, 1.0, 1.0), // Blue
@@ -116,7 +121,14 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
 
     // Write the column to the framebuffer
     for (var y = draw_start; y < draw_end; y++) {
-        let pixel_index = y * SCREEN_WIDTH + x;
         textureStore(frame_buffer, vec2<u32>(x, y), color);
+    }
+
+    for (var y = u32(0); y < draw_start; y++) {
+       textureStore(frame_buffer, vec2<u32>(x, y), ROOF_COLOR);
+    }
+
+    for (var y = draw_end; y < SCREEN_HEIGHT; y++) {
+       textureStore(frame_buffer, vec2<u32>(x, y), FLOOR_COLOR);
     }
 }

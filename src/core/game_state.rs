@@ -4,7 +4,7 @@ use std::cell::SyncUnsafeCell;
 use std::sync::Arc;
 
 // increase this every time you add a new component type
-const COMPONENT_TYPES: usize = 0;
+const COMPONENT_TYPES: usize = 2;
 
 pub struct GameState {
     pub entities: Vec<Arc<SyncUnsafeCell<Entity>>>,
@@ -24,11 +24,11 @@ impl GameState {
         self.should_close = true;
     }
 
-    pub fn get_scheduler<'a>(&'a self) -> &'a Scheduler {
+    pub fn get_scheduler(&self) -> &Scheduler {
         unsafe { &*self.scheduler }
     }
 
-    pub fn get_scheduler_mut<'a>(&'a mut self) -> &'a mut Scheduler {
+    pub fn get_scheduler_mut(&mut self) -> &mut Scheduler {
         unsafe { &mut *self.scheduler }
     }
 
@@ -59,24 +59,24 @@ impl GameState {
         unsafe { &mut *rc.get() }
     }
 
-    pub fn get_entity<'a>(&'a self, id: usize) -> Option<&'a mut Entity> {
+    pub fn get_entity(&self, id: usize) -> Option<&mut Entity> {
         if id >= self.entities.len() {
             return None;
         }
         Some(unsafe { &mut *self.entities[id].get() })
     }
 
-    pub fn get_entity_mut<'a>(&'a self, id: usize) -> Option<&'a mut Entity> {
+    pub fn get_entity_mut(&self, id: usize) -> Option<&mut Entity> {
         if id >= self.entities.len() {
             return None;
         }
         Some(unsafe { &mut *self.entities[id].get() })
     }
 
-    pub fn get_entities_with<'a, T: Component>(
-        &'a self,
+    pub fn get_entities_with<T: Component>(
+        &self,
         component_type: ComponentType,
-    ) -> Vec<&'a Entity> {
+    ) -> Vec<&Entity> {
         self.components[component_type]
             .iter()
             .map(|component| {
@@ -87,10 +87,10 @@ impl GameState {
             .collect()
     }
 
-    pub fn get_entities_with_mut<'a, T: Component>(
-        &'a mut self,
+    pub fn get_entities_with_mut<T: Component>(
+        &mut self,
         component_type: ComponentType,
-    ) -> Vec<&'a mut Entity> {
+    ) -> Vec<&mut Entity> {
         self.components[component_type]
             .iter_mut()
             .map(|component| {
@@ -101,7 +101,7 @@ impl GameState {
             .collect()
     }
 
-    pub fn get_components<'a, T: Component>(&'a self, component_type: ComponentType) -> Vec<&'a T> {
+    pub fn get_components<T: Component>(&self, component_type: ComponentType) -> Vec<&T> {
         self.components[component_type]
             .iter()
             .map(|component| {
@@ -114,10 +114,10 @@ impl GameState {
             .collect()
     }
 
-    pub fn get_components_mut<'a, T: Component>(
-        &'a mut self,
+    pub fn get_components_mut<T: Component>(
+        &mut self,
         component_type: ComponentType,
-    ) -> Vec<&'a mut T> {
+    ) -> Vec<&mut T> {
         self.components[component_type]
             .iter_mut()
             .map(|component| {
@@ -136,7 +136,7 @@ impl GameState {
         self.resources.push(Box::new(resource));
     }
 
-    pub fn get_resource<'a, T: Resource>(&'a self) -> Option<&'a T> {
+    pub fn get_resource<T: Resource>(&self) -> Option<&T> {
         for resource in &self.resources {
             if let Some(r) = resource.as_ref().as_any().downcast_ref::<T>() {
                 return Some(r);
@@ -145,7 +145,7 @@ impl GameState {
         None
     }
 
-    pub fn get_resource_mut<'a, T: Resource>(&'a mut self) -> Option<&'a mut T> {
+    pub fn get_resource_mut<T: Resource>(&mut self) -> Option<&mut T> {
         for resource in &mut self.resources {
             if let Some(r) = (resource.as_mut() as &mut dyn std::any::Any).downcast_mut::<T>() {
                 return Some(r);

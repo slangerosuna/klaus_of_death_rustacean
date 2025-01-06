@@ -1,5 +1,5 @@
-use std::{collections::HashMap, path::PathBuf};
-
+use std::{collections::HashMap, path::PathBuf, borrow::Borrow};
+use egui::Vec2;
 use egui_wgpu::RenderState;
 use wgpu::*;
 
@@ -8,6 +8,7 @@ use crate::impl_resource;
 pub struct GpuDevice {
     pub render_state: RenderState,
     pub shaders: HashMap<String, ShaderModule>,
+    pub output_tex: wgpu::Texture,
 }
 impl_resource!(GpuDevice, 1);
 
@@ -34,7 +35,7 @@ fn gather_all_files(root: PathBuf) -> Vec<PathBuf> {
 }
 
 impl GpuDevice {
-    pub async fn new(render_state: RenderState, shaders_dir: String) -> Option<Self> {
+    pub async fn new(render_state: RenderState, shaders_dir: String) -> Option<(Self, egui::TextureId)> {
         let mut shaders = HashMap::new();
 
         let files = gather_all_files(PathBuf::from(&shaders_dir));
@@ -72,9 +73,33 @@ impl GpuDevice {
             shaders.insert(relative_file, shader);
         }
 
-        Some(Self {
+        let size = (320, 200);
+
+        let output_tex = render_state.device.create_texture(&TextureDescriptor{
+            label: None,
+            size: Extent3d {
+                width: size.0,
+                height: size.1,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            usage: TextureUsages::all(),
+            view_formats: &[TextureFormat::Rgba8Unorm],
+        });
+
+        let texture_view = output_tex.create_view(&Default::default());
+        let tex_id = {
+            let mut renderer = render_state.renderer.write();
+            renderer.register_native_texture(render_state.device.borrow(), &texture_view, FilterMode::Nearest)
+        };
+
+        Some((Self {
             render_state,
             shaders,
-        })
+            output_tex
+        }, tex_id))
     }
 }
