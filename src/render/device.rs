@@ -1,5 +1,4 @@
 use std::{collections::HashMap, path::PathBuf, borrow::Borrow};
-use egui::Vec2;
 use egui_wgpu::RenderState;
 use wgpu::*;
 

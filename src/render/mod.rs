@@ -2,7 +2,7 @@ pub mod device;
 pub(crate) mod map;
 
 use crate::*;
-use wgpu::{*, util::*};
+use wgpu::*;
 
 pub struct RenderState {
     pipeline: ComputePipeline,
@@ -67,7 +67,6 @@ async fn init(game_state: &mut GameState, _time: f64, _dt: f64) {
     entity.add_component(game_state, Transform { position: [50.0, 50.0], rotation: 0.0, scale: [1.0, 1.0]}, Transform::get_component_type())
 }
 
-use crate::*;
 use map::Map;
 use crate::utils::*;
 
@@ -95,7 +94,7 @@ pub async fn render(game_state: &mut GameState, _t: f64, _dt: f64) {
         });
         compute_pass.set_pipeline(pipeline);
         compute_pass.set_bind_group(0, &bind_group, &[]);
-        compute_pass.dispatch_workgroups(320 / 16, 1, 1);
+        compute_pass.dispatch_workgroups(320 / 8, 1, 1);
     }
 
     gpu.render_state.queue.submit(std::iter::once(encoder.finish()));

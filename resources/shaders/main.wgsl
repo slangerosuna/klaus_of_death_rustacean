@@ -24,7 +24,7 @@ var<private> COLORS: array<vec4<f32>, 9> = array(
 @group(0) @binding(2) var frame_buffer: texture_storage_2d<rgba8unorm, write>;
 
 // Compute Shader
-@compute @workgroup_size(16, 1, 1)
+@compute @workgroup_size(8, 1, 1)
 fn main(@builtin(global_invocation_id) id: vec3<u32>) {
     let x = id.x; // Column index
     if (x >= SCREEN_WIDTH) {
@@ -51,12 +51,12 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
     if ray_dir.x == 0.0 {
         delta_dist.x = 1e30;
     } else {
-        delta_dist.x = (1.0 / ray_dir.x);
+        delta_dist.x = abs(1.0 / ray_dir.x);
     }
     if ray_dir.y == 0.0 {
         delta_dist.y = 1e30;
     } else {
-        delta_dist.y = (1.0 / ray_dir.y);
+        delta_dist.y = abs(1.0 / ray_dir.y);
     }
 
     var side_dist = vec2<f32>(0.0, 0.0);
@@ -117,18 +117,22 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
 
     // Get the wall color (using map value)
     let color_idx = map[map_y * i32(MAP_SIZE) + map_x];
-    let color = COLORS[color_idx];
+    var color = COLORS[color_idx];
+    if side == 1 {
+        color = color * 0.9;
+    }
 
-    // Write the column to the framebuffer
+    // Render the wall slice
     for (var y = draw_start; y < draw_end; y++) {
         textureStore(frame_buffer, vec2<u32>(x, y), color);
     }
 
+    // Render the roof and floor
     for (var y = u32(0); y < draw_start; y++) {
-       textureStore(frame_buffer, vec2<u32>(x, y), ROOF_COLOR);
+        textureStore(frame_buffer, vec2<u32>(x, y), ROOF_COLOR);
     }
 
     for (var y = draw_end; y < SCREEN_HEIGHT; y++) {
-       textureStore(frame_buffer, vec2<u32>(x, y), FLOOR_COLOR);
+        textureStore(frame_buffer, vec2<u32>(x, y), FLOOR_COLOR);
     }
 }

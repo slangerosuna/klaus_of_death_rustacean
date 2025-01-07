@@ -1,6 +1,7 @@
 #![feature(sync_unsafe_cell)]
 #![feature(trait_upcasting)]
 #![feature(downcast_unchecked)]
+#![feature(variant_count)]
 
 use std::sync::Arc;
 
@@ -8,7 +9,7 @@ use eframe::egui;
 use egui_wgpu::WgpuConfiguration;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use tokio::{runtime::{Builder, Runtime}, spawn};
+use tokio::runtime::{Builder, Runtime};
 use wgpu::{DeviceDescriptor, Features};
 
 pub mod app;
@@ -19,6 +20,7 @@ pub mod utils;
 
 use app::App;
 pub use core::*;
+pub use utils::*;
 pub use std::any::Any;
 use networking::{Networking, NetworkingCreationInfo};
 use render::device::GpuDevice;
@@ -42,7 +44,7 @@ pub struct Config {
 
 fn main() -> ! {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size(&CONFIG.inner_size),
+        viewport: egui::ViewportBuilder::default().with_inner_size(&CONFIG.inner_size).with_resizable(true).with_title("Klaus Of Death"),
         renderer: eframe::Renderer::Wgpu,
         wgpu_options: WgpuConfiguration {
             device_descriptor: Arc::new(|_| DeviceDescriptor {
@@ -74,7 +76,7 @@ struct SendBox<T>(std::pin::Pin<Box<T>>);
 unsafe impl<T> Send for SendBox<T> {}
 
 impl<T> SendBox<T> {
-    unsafe fn new(t: T) -> Self {
+    unsafe fn _new(t: T) -> Self {
         SendBox(Box::pin(t))
     }
 }
