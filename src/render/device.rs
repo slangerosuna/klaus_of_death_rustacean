@@ -72,7 +72,7 @@ impl GpuDevice {
             shaders.insert(relative_file, shader);
         }
 
-        let size = (320, 200);
+        let size = (1920, 1080);
 
         let output_tex = render_state.device.create_texture(&TextureDescriptor{
             label: None,
@@ -92,7 +92,7 @@ impl GpuDevice {
         let texture_view = output_tex.create_view(&Default::default());
         let tex_id = {
             let mut renderer = render_state.renderer.write();
-            renderer.register_native_texture(render_state.device.borrow(), &texture_view, FilterMode::Nearest)
+            renderer.register_native_texture(render_state.device.borrow(), &texture_view, FilterMode::Linear)
         };
 
         Some((Self {

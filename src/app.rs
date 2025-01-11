@@ -117,7 +117,7 @@ impl eframe::App for App {
                 let events = reader.events.clone();
                 self.input_sender.tx.send(events).unwrap();
             });
-            let panel_rect = ui.min_rect();
+            let panel_rect = ui.max_rect();
             let rect = largest_16_9_rect(panel_rect);
 
             let image = Image::new((self.output_image, rect.size()));
