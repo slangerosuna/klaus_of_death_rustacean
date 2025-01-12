@@ -16,7 +16,7 @@ struct InputData {
 @group(0) @binding(1) var textures : texture_storage_2d_array<rgba8unorm, read>;
 @group(0) @binding(2) var frame_buffer : texture_storage_2d<rgba8unorm, write>;
 
-@compute @workgroup_size(8, 8, 1)
+@compute @workgroup_size(16, 16, 1)
 fn main(@builtin(global_invocation_id) id : vec3<u32>) {
     let data = in_data[id.x];
     let y = id.y;
