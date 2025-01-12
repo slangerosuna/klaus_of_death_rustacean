@@ -1,4 +1,4 @@
-const SCREEN_WIDTH: u32 = 1920;  // Screen resolution width
+const SCREEN_WIDTH: u32 = 1920;
 const MAP_SIZE: u32 = 64; // Size of the game map (MAP_SIZE x MAP_SIZE)
 
 @group(0) @binding(0) var<storage, read> map: array<u32>;

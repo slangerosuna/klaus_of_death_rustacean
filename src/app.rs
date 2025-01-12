@@ -2,6 +2,8 @@ use std::pin::Pin;
 
 use eframe::*;
 use egui::*;
+use render::map::Map;
+use render::map::Direction;
 use crate::*;
 
 pub struct App {
@@ -34,11 +36,22 @@ pub async fn rotate_system(game_state: &mut GameState, _t: f64, dt: f64) {
 
     player.rotation += delta_rotation as f32;
 
+    let prev_pos = player.position;
+
     let sin = f32::sin(player.rotation);
     let cos = f32::cos(player.rotation);
 
     player.position[0] += sin * move_forward * dt as f32 - cos * move_right * dt as f32;
     player.position[1] += cos * move_forward * dt as f32 + sin * move_right * dt as f32;
+
+    let map = game_state.get_resource::<Map>().unwrap();
+    
+    for direction in map.intersects_rect(player.position[0], player.position[1], 0.5, 0.5) {
+        match direction {
+            Direction::Up | Direction::Down => player.position[1] = prev_pos[1],
+            Direction::Left | Direction::Right=> player.position[0] = prev_pos[0],
+        }
+    }
 }
 
 impl App {

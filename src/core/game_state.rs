@@ -59,14 +59,14 @@ impl GameState {
         unsafe { &mut *rc.get() }
     }
 
-    pub fn get_entity(&self, id: usize) -> Option<&mut Entity> {
+    pub fn get_entity(&self, id: usize) -> Option<&'static mut Entity> {
         if id >= self.entities.len() {
             return None;
         }
         Some(unsafe { &mut *self.entities[id].get() })
     }
 
-    pub fn get_entity_mut(&self, id: usize) -> Option<&mut Entity> {
+    pub fn get_entity_mut(&self, id: usize) -> Option<&'static mut Entity> {
         if id >= self.entities.len() {
             return None;
         }
@@ -76,7 +76,7 @@ impl GameState {
     pub fn get_entities_with<T: Component>(
         &self,
         component_type: ComponentType,
-    ) -> Vec<&Entity> {
+    ) -> Vec<&'static Entity> {
         self.components[component_type]
             .iter()
             .map(|component| {
@@ -90,7 +90,7 @@ impl GameState {
     pub fn get_entities_with_mut<T: Component>(
         &mut self,
         component_type: ComponentType,
-    ) -> Vec<&mut Entity> {
+    ) -> Vec<&'static mut Entity> {
         self.components[component_type]
             .iter_mut()
             .map(|component| {
@@ -101,7 +101,7 @@ impl GameState {
             .collect()
     }
 
-    pub fn get_components<T: Component>(&self, component_type: ComponentType) -> Vec<&T> {
+    pub fn get_components<T: Component>(&self, component_type: ComponentType) -> Vec<&'static T> {
         self.components[component_type]
             .iter()
             .map(|component| {
@@ -109,7 +109,7 @@ impl GameState {
                 let component = unsafe { &*component };
                 let component = &component.component;
                 let component = &**component;
-                unsafe { (component as &dyn Any).downcast_ref_unchecked::<T>() }
+                unsafe { &*((component as &dyn Any).downcast_ref_unchecked::<T>() as *const T) }
             })
             .collect()
     }
@@ -117,7 +117,7 @@ impl GameState {
     pub fn get_components_mut<T: Component>(
         &mut self,
         component_type: ComponentType,
-    ) -> Vec<&mut T> {
+    ) -> Vec<&'static mut T> {
         self.components[component_type]
             .iter_mut()
             .map(|component| {
@@ -127,7 +127,8 @@ impl GameState {
                 let component = &mut **component;
                 let component =
                     unsafe { (component as &mut dyn std::any::Any).downcast_mut_unchecked::<T>() };
-                component
+                let component = component as *mut T;
+                unsafe { &mut *component }
             })
             .collect()
     }
@@ -136,19 +137,19 @@ impl GameState {
         self.resources.push(Box::new(resource));
     }
 
-    pub fn get_resource<T: Resource>(&self) -> Option<&T> {
+    pub fn get_resource<T: Resource>(&self) -> Option<&'static T> {
         for resource in &self.resources {
             if let Some(r) = resource.as_ref().as_any().downcast_ref::<T>() {
-                return Some(r);
+                return Some(unsafe { &*(r as *const _) });
             }
         }
         None
     }
 
-    pub fn get_resource_mut<T: Resource>(&mut self) -> Option<&mut T> {
+    pub fn get_resource_mut<T: Resource>(&mut self) -> Option<&'static mut T> {
         for resource in &mut self.resources {
             if let Some(r) = (resource.as_mut() as &mut dyn std::any::Any).downcast_mut::<T>() {
-                return Some(r);
+                return Some(unsafe { &mut*(r as *mut _) });
             }
         }
         None

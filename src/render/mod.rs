@@ -41,7 +41,7 @@ async fn init(game_state: &mut GameState, _time: f64, _dt: f64) {
 
     let bind_group_layout = ray_pipeline.get_bind_group_layout(0);
 
-    let Map(buffer) = &map;
+    let Map{ buffer, .. } = &map;
     let tex = &gpu.output_tex;
     let view = tex.create_view(&TextureViewDescriptor::default());
 
@@ -113,7 +113,7 @@ async fn init(game_state: &mut GameState, _time: f64, _dt: f64) {
 
     let entity = game_state.create_entity("Player".to_string());
     entity.add_component(game_state, Player, Player::get_component_type());
-    entity.add_component(game_state, Transform { position: [50.0, 50.0], rotation: 0.0, scale: [1.0, 1.0]}, Transform::get_component_type())
+    entity.add_component(game_state, Transform { position: [15.0, 20.0], rotation: 0.0, scale: [1.0, 1.0]}, Transform::get_component_type())
 }
 
 use map::Map;
@@ -153,7 +153,7 @@ pub async fn render(game_state: &mut GameState, _t: f64, _dt: f64) {
         });
         compute_pass.set_pipeline(render_pipeline);
         compute_pass.set_bind_group(0, &render_bind_group, &[]);
-        compute_pass.dispatch_workgroups(1920 / 8, 1080 / 8, 1);
+        compute_pass.dispatch_workgroups(1920 / 16, 1080 / 16, 1);
     }
 
     gpu.render_state.queue.submit(std::iter::once(encoder.finish()));

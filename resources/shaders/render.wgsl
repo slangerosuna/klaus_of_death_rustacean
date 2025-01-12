@@ -26,7 +26,6 @@ fn main(@builtin(global_invocation_id) id : vec3<u32>) {
     let draw_start = -line_height / 2 + i32(SCREEN_HEIGHT) / 2;
     let draw_end = line_height / 2 + i32(SCREEN_HEIGHT) / 2;
     
-    // Calculate the texture position
     let tex_position = f32(i32(y) - draw_start) / f32(draw_end - draw_start);
     if tex_position < 0.0 {
         textureStore(frame_buffer, vec2<u32>(id.x, y), ROOF_COLOR);
@@ -40,7 +39,7 @@ fn main(@builtin(global_invocation_id) id : vec3<u32>) {
 
     let uv = vec2<f32>(data.tex_coord, tex_position);
     let tex_coords = vec2<u32>(uv * vec2<f32>(TEX_BOUNDS));
-    var color = textureLoad(textures, tex_coords, data.tex) * 0.8;
+    var color = textureLoad(textures, tex_coords, data.tex);
     if data.side == 1 {
         color = color * 0.8;
     }
