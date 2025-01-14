@@ -1,7 +1,7 @@
 ## Installation
 Klaus of Death is on crates.io, so it can be installed with Cargo.
 ```
-cargo install joyful_create
+cargo install klaus_of_death
 ```
 
 ## Contribution
