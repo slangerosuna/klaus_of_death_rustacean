@@ -149,7 +149,7 @@ impl GameState {
     pub fn get_resource_mut<T: Resource>(&mut self) -> Option<&'static mut T> {
         for resource in &mut self.resources {
             if let Some(r) = (resource.as_mut() as &mut dyn std::any::Any).downcast_mut::<T>() {
-                return Some(unsafe { &mut*(r as *mut _) });
+                return Some(unsafe { &mut *(r as *mut _) });
             }
         }
         None

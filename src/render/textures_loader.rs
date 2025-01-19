@@ -64,5 +64,5 @@ impl TextureLoader {
         );
 
         texture
-    } 
+    }
 }

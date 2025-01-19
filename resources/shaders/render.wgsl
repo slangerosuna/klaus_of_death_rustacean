@@ -1,8 +1,8 @@
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 1080;
 
-const ROOF_COLOR = vec4<f32>(0.25, 0.25, 0.31, 1.0);
-const FLOOR_COLOR = vec4<f32>(0.2, 0.2, 0.24, 1.0);
+const ROOF_COLOR = vec4<f32>(0.16, 0.16, 0.18, 1.0);
+const FLOOR_COLOR = vec4<f32>(0.2, 0.15, 0.06, 1.0);
 
 const TEX_BOUNDS = vec2<u32>(16, 16);
 
@@ -27,11 +27,11 @@ fn main(@builtin(global_invocation_id) id : vec3<u32>) {
     let draw_end = line_height / 2 + i32(SCREEN_HEIGHT) / 2;
     
     let tex_position = f32(i32(y) - draw_start) / f32(draw_end - draw_start);
-    if tex_position < 0.0 {
+    if tex_position <= 0.0 {
         textureStore(frame_buffer, vec2<u32>(id.x, y), ROOF_COLOR);
         
         return;
-    } else if tex_position > 1.0 {
+    } else if tex_position >= 1.0 {
         textureStore(frame_buffer, vec2<u32>(id.x, y), FLOOR_COLOR);
         
         return;

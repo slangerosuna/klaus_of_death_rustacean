@@ -20,10 +20,10 @@ pub mod utils;
 
 use app::App;
 pub use core::*;
-pub use utils::*;
-pub use std::any::Any;
 use networking::{Networking, NetworkingCreationInfo};
 use render::device::GpuDevice;
+pub use std::any::Any;
+pub use utils::*;
 
 lazy_static! {
     pub static ref CONFIG: Config = get_resource_toml("config.toml");
@@ -44,7 +44,10 @@ pub struct Config {
 
 fn main() -> ! {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size(&CONFIG.inner_size).with_resizable(true).with_title("Klaus Of Death"),
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size(&CONFIG.inner_size)
+            .with_resizable(true)
+            .with_title("Klaus Of Death"),
         renderer: eframe::Renderer::Wgpu,
         wgpu_options: WgpuConfiguration {
             device_descriptor: Arc::new(|_| DeviceDescriptor {
@@ -66,7 +69,8 @@ fn main() -> ! {
 
             Ok(Box::new(app))
         }),
-    ).unwrap();
+    )
+    .unwrap();
 
     std::process::exit(0);
 }
