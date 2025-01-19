@@ -5,7 +5,7 @@ cargo install klaus_of_death
 ```
 
 ## Contribution
-If you would like to contribute, I would be incredibly grateful. Pull requests are welcome. To report bugs or request features, please visit our GitHub Issues page.
+If you would like to contribute, I would be incredibly grateful. Pull requests are welcome. To report bugs or request features, please visit [our GitHub Issues page](https://github.com/slangerosuna/klaus_of_death_rustacean/issues).
 
 ## License
 Klaus of Death is licensed under the GPL. See the [LICENSE](https://github.com/slangerosuna/klaus_of_death_rustacean/blob/master/LICENSE) file for more details.
