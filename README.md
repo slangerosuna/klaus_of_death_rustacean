@@ -8,6 +8,9 @@ Klaus of Death is on [crates.io](https://crates.io/crates/klaus_of_death), so it
 ```
 cargo install klaus_of_death
 ```
+If you do not have the rust toolchain installed, you can install it [here](https://rustup.rs/), where you can then run the above command in your terminal.
+
+At some point in the future, I may set up this repo to use GitHub Releases to make installation simpler.
 
 ## Contribution
 If you would like to contribute, I would be incredibly grateful. Pull requests are welcome. To report bugs or request features, please visit [our GitHub Issues page](https://github.com/slangerosuna/klaus_of_death_rustacean/issues).
